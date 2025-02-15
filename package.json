@@ -11,6 +11,7 @@
   "dependencies": {
     "@hookform/resolvers": "^4.0.0",
     "@lucia-auth/adapter-prisma": "^4.0.1",
+    "@node-rs/argon2": "^2.0.2",
     "@prisma/client": "^6.3.1",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-dropdown-menu": "^2.1.6",
@@ -27,6 +28,7 @@
     "@tiptap/starter-kit": "^2.11.5",
     "@uploadthing/react": "^7.1.5",
     "arctic": "^3.2.4",
+    "argon2": "^0.41.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
