@@ -57,7 +57,7 @@ export default function SignUpForm() {
         />
         <FormField
           control={form.control}
-          name="password"
+          name="email"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>
