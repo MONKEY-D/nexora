@@ -7,3 +7,6 @@ npx --legacy-peer-deps shadcn@latest add button dialog dropdown-menu form input 
 
 
 shadcn ui is the best component library for nextjs and react, it can be customised based on your preference
+
+
+for post editor i have used the TipTap Docs
