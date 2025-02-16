@@ -29,7 +29,7 @@ export default function Post({ post }: PostProps) {
           </Link>
         </div>
       </div>
-      <div className="whitespace-pre-line break-words">{post.content}</div>
+      <div className="whitespace-pre-line break-words">{post.content} </div>
     </article>
   );
 }
