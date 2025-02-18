@@ -1,7 +1,7 @@
 "use client";
 
 import { useToast } from "@/hooks/use-toast";
-import useFolloweInfo from "@/hooks/useFollowerInfo";
+import useFollowerInfo from "@/hooks/useFollowerInfo";
 import { FollowerInfo } from "@/lib/types";
 import { QueryKey, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "./ui/button";
@@ -20,7 +20,7 @@ export default function FollowButton({
 
   const queryClient = useQueryClient();
 
-  const { data } = useFolloweInfo(userId, initialState);
+  const { data } = useFollowerInfo(userId, initialState);
 
   const queryKey: QueryKey = ["follower-info", userId];
 
