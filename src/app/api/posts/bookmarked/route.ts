@@ -8,32 +8,34 @@ export async function GET(req: NextRequest) {
     const cursor = req.nextUrl.searchParams.get("cursor") || undefined;
 
     const pageSize = 10;
+
     const { user } = await validateRequest();
 
     if (!user) {
-      return Response.json({ error: "Unauthorised" }, { status: 401 });
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const posts = await prisma.post.findMany({
+    const bookmarks = await prisma.bookmark.findMany({
       where: {
-        user: {
-          followers: {
-            some: {
-              followerId: user.id,
-            },
-          },
+        userId: user.id,
+      },
+      include: {
+        post: {
+          include: getPostDataInclude(user.id),
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: {
+        createdAt: "desc",
+      },
       take: pageSize + 1,
       cursor: cursor ? { id: cursor } : undefined,
-      include: getPostDataInclude(user.id),
     });
 
-    const nextCursor = posts.length > pageSize ? posts[pageSize].id : null;
+    const nextCursor =
+      bookmarks.length > pageSize ? bookmarks[pageSize].id : null;
 
     const data: PostsPage = {
-      posts: posts.slice(0, pageSize),
+      posts: bookmarks.slice(0, pageSize).map((bookmark) => bookmark.post),
       nextCursor,
     };
 
