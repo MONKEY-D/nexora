@@ -1,4 +1,4 @@
-"useClient";
+"use client";
 
 import { PostData } from "@/lib/types";
 import Link from "next/link";
