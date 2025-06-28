@@ -13,7 +13,7 @@ export async function submitPost(input: {
 
   if (!user) throw Error("Unauthorized");
 
-  const { content, mediaIds } = createPostSchema.parse({ input });
+  const { content, mediaIds } = createPostSchema.parse(input);
 
   const newPost = await prisma.post.create({
     data: {
