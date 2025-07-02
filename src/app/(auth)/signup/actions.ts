@@ -1,12 +1,14 @@
+"use server";
+
 import { lucia } from "@/auth";
 import prisma from "@/lib/prisma";
+import streamServerClient from "@/lib/stream";
 import { signUpSchema, SignUpValues } from "@/lib/validation";
 import { hash } from "@node-rs/argon2";
 import { generateIdFromEntropySize } from "lucia";
-import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import { isRedirectError } from "next/dist/client/components/redirect";
-import streamServerClient from "@/lib/stream";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export async function signUp(
   credentials: SignUpValues,
@@ -33,7 +35,9 @@ export async function signUp(
     });
 
     if (existingUsername) {
-      return { error: "Username is already taken" };
+      return {
+        error: "Username already taken",
+      };
     }
 
     const existingEmail = await prisma.user.findFirst({
@@ -44,6 +48,7 @@ export async function signUp(
         },
       },
     });
+
     if (existingEmail) {
       return {
         error: "Email already taken",
@@ -69,7 +74,7 @@ export async function signUp(
 
     const session = await lucia.createSession(userId, {});
     const sessionCookie = lucia.createSessionCookie(session.id);
-    (await cookies()).set(
+    cookies().set(
       sessionCookie.name,
       sessionCookie.value,
       sessionCookie.attributes,
@@ -77,11 +82,10 @@ export async function signUp(
 
     return redirect("/");
   } catch (error) {
-    console.error(error);
     if (isRedirectError(error)) throw error;
     console.error(error);
     return {
-      error: "Something went wrong, Please try again.",
+      error: "Something went wrong. Please try again.",
     };
   }
 }

@@ -41,9 +41,10 @@ export async function login(
         error: "Incorrect username or password",
       };
     }
+
     const session = await lucia.createSession(existingUser.id, {});
     const sessionCookie = lucia.createSessionCookie(session.id);
-    (await cookies()).set(
+    cookies().set(
       sessionCookie.name,
       sessionCookie.value,
       sessionCookie.attributes,

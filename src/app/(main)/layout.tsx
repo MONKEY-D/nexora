@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import React from "react";
 import SessionProvider from "./SessionProvider";
 import Navbar from "./Navbar";
-import MenuBar from "./menuBar";
+import MenuBar from "./MenuBar";
 
 export default async function Layout({
   children,
