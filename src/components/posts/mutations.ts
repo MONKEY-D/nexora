@@ -50,7 +50,7 @@ export function useDeletePostMutation() {
     onError(error) {
       toast({
         variant: "destructive",
-        description: "Failed to delete post. Please try again.",
+        description: `Failed to delete post: ${error.message}`,
       });
     },
   });
