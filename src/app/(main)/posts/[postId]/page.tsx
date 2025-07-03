@@ -7,46 +7,37 @@ import UserTooltip from "@/components/UserToolTip";
 import prisma from "@/lib/prisma";
 import { getPostDataInclude, UserData } from "@/lib/types";
 import { Loader2 } from "lucide-react";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-interface PageProps {
-  params: { postId: string };
-}
-
-// Removed `cache()` to avoid build issues with async functions
-async function getPost(postId: string, loggedInUserId: string) {
-  const post = await prisma.post.findUnique({
-    where: {
-      id: postId,
-    },
-    include: getPostDataInclude(loggedInUserId),
-  });
-
-  if (!post) notFound();
-
-  return post;
-}
+// Do NOT define PageProps manually — let Next.js infer it automatically
+// Instead just destructure params directly in function arguments
 
 export async function generateMetadata({
-  params: { postId },
-}: PageProps): Promise<Metadata> {
+  params,
+}: {
+  params: { postId: string };
+}): Promise<Metadata> {
   const { user } = await validateRequest();
 
   if (!user) return {};
 
-  const post = await getPost(postId, user.id);
+  const post = await prisma.post.findUnique({
+    where: { id: params.postId },
+    include: getPostDataInclude(user.id),
+  });
+
+  if (!post) return {};
 
   return {
     title: `${post.user.displayName}: ${post.content.slice(0, 50)}...`,
   };
 }
 
-export default async function Page({ params: { postId } }: PageProps) {
+export default async function Page({ params }: { params: { postId: string } }) {
   const { user } = await validateRequest();
-
   if (!user) {
     return (
       <p className="text-destructive">
@@ -55,7 +46,12 @@ export default async function Page({ params: { postId } }: PageProps) {
     );
   }
 
-  const post = await getPost(postId, user.id);
+  const post = await prisma.post.findUnique({
+    where: { id: params.postId },
+    include: getPostDataInclude(user.id),
+  });
+
+  if (!post) notFound();
 
   return (
     <main className="flex w-full min-w-0 gap-5">
@@ -71,13 +67,8 @@ export default async function Page({ params: { postId } }: PageProps) {
   );
 }
 
-interface UserInfoSidebarProps {
-  user: UserData;
-}
-
-async function UserInfoSidebar({ user }: UserInfoSidebarProps) {
+async function UserInfoSidebar({ user }: { user: UserData }) {
   const { user: loggedInUser } = await validateRequest();
-
   if (!loggedInUser) return null;
 
   return (
