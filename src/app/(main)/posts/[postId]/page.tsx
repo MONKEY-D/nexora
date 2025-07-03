@@ -7,13 +7,13 @@ import UserTooltip from "@/components/UserToolTip";
 import prisma from "@/lib/prisma";
 import { getPostDataInclude, UserData } from "@/lib/types";
 import { Loader2 } from "lucide-react";
-import type { Metadata } from "next";
+import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-// Do NOT define PageProps manually — let Next.js infer it automatically
-// Instead just destructure params directly in function arguments
+// ✅ FIX: Do NOT define PageProps manually.
+// Let Next.js automatically pass params
 
 export async function generateMetadata({
   params,
@@ -38,6 +38,7 @@ export async function generateMetadata({
 
 export default async function Page({ params }: { params: { postId: string } }) {
   const { user } = await validateRequest();
+
   if (!user) {
     return (
       <p className="text-destructive">
