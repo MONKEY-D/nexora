@@ -12,16 +12,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-// ✅ FIX: Do NOT define PageProps manually.
-// Let Next.js automatically pass params
+// ✅ FIXED: correct params typing for Next.js app router
+type Params = { params: { postId: string } };
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { postId: string };
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { user } = await validateRequest();
-
   if (!user) return {};
 
   const post = await prisma.post.findUnique({
@@ -36,9 +31,8 @@ export async function generateMetadata({
   };
 }
 
-export default async function Page({ params }: { params: { postId: string } }) {
+export default async function Page({ params }: Params) {
   const { user } = await validateRequest();
-
   if (!user) {
     return (
       <p className="text-destructive">
