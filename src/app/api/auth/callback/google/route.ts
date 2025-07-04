@@ -12,8 +12,9 @@ export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
   const state = req.nextUrl.searchParams.get("state");
 
-  const storedState = cookies().get("state")?.value;
-  const storedCodeVerifier = cookies().get("code_verifier")?.value;
+  const cookieStore = await cookies();
+  const storedState = cookieStore.get("state")?.value;
+  const storedCodeVerifier = cookieStore.get("code_verifier")?.value;
 
   if (
     !code ||
@@ -48,7 +49,7 @@ export async function GET(req: NextRequest) {
     if (existingUser) {
       const session = await lucia.createSession(existingUser.id, {});
       const sessionCookie = lucia.createSessionCookie(session.id);
-      cookies().set(
+      cookieStore.set(
         sessionCookie.name,
         sessionCookie.value,
         sessionCookie.attributes,
@@ -83,7 +84,7 @@ export async function GET(req: NextRequest) {
 
     const session = await lucia.createSession(userId, {});
     const sessionCookie = lucia.createSessionCookie(session.id);
-    cookies().set(
+    cookieStore.set(
       sessionCookie.name,
       sessionCookie.value,
       sessionCookie.attributes,

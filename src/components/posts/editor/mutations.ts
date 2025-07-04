@@ -19,16 +19,17 @@ export function useSubmitPostMutation() {
   const mutation = useMutation({
     mutationFn: submitPost,
     onSuccess: async (newPost) => {
-      const queryFilter = {
-        queryKey: ["post-feed"],
-        predicate(query) {
-          return (
-            query.queryKey.includes("for-you") ||
-            (query.queryKey.includes("user-posts") &&
-              query.queryKey.includes(user.id))
-          );
-        },
-      } satisfies QueryFilters;
+      const queryFilter: QueryFilters<InfiniteData<PostsPage, string | null>> =
+        {
+          queryKey: ["post-feed"],
+          predicate(query) {
+            return (
+              query.queryKey.includes("for-you") ||
+              (query.queryKey.includes("user-posts") &&
+                query.queryKey.includes(user.id))
+            );
+          },
+        };
 
       await queryClient.cancelQueries(queryFilter);
 
@@ -55,7 +56,12 @@ export function useSubmitPostMutation() {
       queryClient.invalidateQueries({
         queryKey: queryFilter.queryKey,
         predicate(query) {
-          return queryFilter.predicate(query) && !query.state.data;
+          return (
+            (query.queryKey.includes("for-you") ||
+              (query.queryKey.includes("user-posts") &&
+                query.queryKey.includes(user.id))) &&
+            !query.state.data
+          );
         },
       });
 
