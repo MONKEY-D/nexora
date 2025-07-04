@@ -13,7 +13,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 // ✅ Define PageProps once and share across the file
-interface PageProps {
+interface PostParamProps {
   params: {
     postId: string;
   };
@@ -22,7 +22,7 @@ interface PageProps {
 // ✅ generateMetadata using shared PageProps
 export async function generateMetadata({
   params,
-}: PageProps): Promise<Metadata> {
+}: PostParamProps): Promise<Metadata> {
   const { user } = await validateRequest();
   if (!user) return {};
 
@@ -39,7 +39,7 @@ export async function generateMetadata({
 }
 
 // ✅ Page component using same PageProps
-export default async function Page({ params }: PageProps) {
+export default async function Page({ params }: PostParamProps) {
   const { user } = await validateRequest();
   if (!user) {
     return (
