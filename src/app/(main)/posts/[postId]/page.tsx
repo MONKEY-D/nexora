@@ -12,14 +12,18 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-// ✅ Define PageProps once and share across the file
+// ✅ Shared type for both page and metadata
 interface PostParamProps {
   params: {
     postId: string;
   };
 }
 
-// ✅ generateMetadata using shared PageProps
+// ✅ Required to satisfy dynamic segment expectations
+export async function generateStaticParams() {
+  return [];
+}
+
 export async function generateMetadata({
   params,
 }: PostParamProps): Promise<Metadata> {
@@ -38,7 +42,6 @@ export async function generateMetadata({
   };
 }
 
-// ✅ Page component using same PageProps
 export default async function Page({ params }: PostParamProps) {
   const { user } = await validateRequest();
   if (!user) {
@@ -70,7 +73,6 @@ export default async function Page({ params }: PostParamProps) {
   );
 }
 
-// ✅ Sidebar component remains the same
 async function UserInfoSidebar({ user }: { user: UserData }) {
   const { user: me } = await validateRequest();
   if (!me) return null;
