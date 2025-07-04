@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { validateRequest } from "@/auth";
 import FollowButton from "@/components/FollowButton";
 import Linkify from "@/components/Linkify";
@@ -11,12 +12,33 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-type PageProps = {
+// ✅ Define PageProps once and share across the file
+interface PageProps {
   params: {
     postId: string;
   };
-};
+}
 
+// ✅ generateMetadata using shared PageProps
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { user } = await validateRequest();
+  if (!user) return {};
+
+  const post = await prisma.post.findUnique({
+    where: { id: params.postId },
+    include: getPostDataInclude(user.id),
+  });
+
+  if (!post) return {};
+
+  return {
+    title: `${post.user.displayName}: ${post.content.slice(0, 50)}...`,
+  };
+}
+
+// ✅ Page component using same PageProps
 export default async function Page({ params }: PageProps) {
   const { user } = await validateRequest();
   if (!user) {
@@ -48,6 +70,7 @@ export default async function Page({ params }: PageProps) {
   );
 }
 
+// ✅ Sidebar component remains the same
 async function UserInfoSidebar({ user }: { user: UserData }) {
   const { user: me } = await validateRequest();
   if (!me) return null;
