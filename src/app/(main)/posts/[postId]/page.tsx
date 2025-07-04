@@ -11,7 +11,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-export default async function Page({ params }: { params: { postId: string } }) {
+type PageProps = {
+  params: {
+    postId: string;
+  };
+};
+
+export default async function Page({ params }: PageProps) {
   const { user } = await validateRequest();
   if (!user) {
     return (
