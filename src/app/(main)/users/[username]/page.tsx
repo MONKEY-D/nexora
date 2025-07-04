@@ -14,8 +14,9 @@ import Linkify from "@/components/Linkify";
 import FollowButton from "@/components/FollowButton";
 import EditProfileButton from "./EditProfileButton";
 
+// ✅ Updated interface for Next.js 15 - params is now a Promise
 interface PageProps {
-  params: { username: string };
+  params: Promise<{ username: string }>;
 }
 
 const getUser = cache(async (username: string, loggedInUserId: string) => {
@@ -35,8 +36,11 @@ const getUser = cache(async (username: string, loggedInUserId: string) => {
 });
 
 export async function generateMetadata({
-  params: { username },
+  params,
 }: PageProps): Promise<Metadata> {
+  // ✅ Await params in Next.js 15
+  const { username } = await params;
+
   const { user: loggedInUser } = await validateRequest();
 
   if (!loggedInUser) return {};
@@ -48,7 +52,10 @@ export async function generateMetadata({
   };
 }
 
-export default async function Page({ params: { username } }: PageProps) {
+export default async function Page({ params }: PageProps) {
+  // ✅ Await params in Next.js 15
+  const { username } = await params;
+
   const { user: loggedInUser } = await validateRequest();
 
   if (!loggedInUser) {
