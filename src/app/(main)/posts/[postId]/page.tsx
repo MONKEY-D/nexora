@@ -8,25 +8,47 @@ import prisma from "@/lib/prisma";
 import { getPostDataInclude, UserData } from "@/lib/types";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-type PgProps = { params: { postId: string } };
+export async function generateMetadata({
+  params,
+}: {
+  params: { postId: string };
+}): Promise<Metadata> {
+  const { user } = await validateRequest();
+  if (!user) return {};
 
-async function getPost(postId: string, userId: string) {
   const post = await prisma.post.findUnique({
-    where: { id: postId },
-    include: getPostDataInclude(userId),
+    where: { id: params.postId },
+    include: getPostDataInclude(user.id),
   });
-  if (!post) notFound();
-  return post;
+
+  if (!post) return {};
+
+  return {
+    title: `${post.user.displayName}: ${post.content.slice(0, 50)}...`,
+  };
 }
 
-export default async function Page({ params }: PgProps) {
+export default async function Page({ params }: { params: { postId: string } }) {
   const { user } = await validateRequest();
-  if (!user) return <p className="text-destructive">Not authorized</p>;
+  if (!user) {
+    return (
+      <p className="text-destructive">
+        You&apos;re not authorized to view this page.
+      </p>
+    );
+  }
 
-  const post = await getPost(params.postId, user.id);
+  const post = await prisma.post.findUnique({
+    where: { id: params.postId },
+    include: getPostDataInclude(user.id),
+  });
+
+  if (!post) notFound();
+
   return (
     <main className="flex w-full gap-5">
       <div className="w-full space-y-5">
