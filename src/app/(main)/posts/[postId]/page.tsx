@@ -12,19 +12,24 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-// ✅ FIXED: correct params typing for Next.js app router
 type Params = { params: { postId: string } };
+
+async function getPost(postId: string, loggedInUserId: string) {
+  const post = await prisma.post.findUnique({
+    where: { id: postId },
+    include: getPostDataInclude(loggedInUserId),
+  });
+
+  if (!post) notFound();
+
+  return post;
+}
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { user } = await validateRequest();
   if (!user) return {};
 
-  const post = await prisma.post.findUnique({
-    where: { id: params.postId },
-    include: getPostDataInclude(user.id),
-  });
-
-  if (!post) return {};
+  const post = await getPost(params.postId, user.id);
 
   return {
     title: `${post.user.displayName}: ${post.content.slice(0, 50)}...`,
@@ -41,12 +46,7 @@ export default async function Page({ params }: Params) {
     );
   }
 
-  const post = await prisma.post.findUnique({
-    where: { id: params.postId },
-    include: getPostDataInclude(user.id),
-  });
-
-  if (!post) notFound();
+  const post = await getPost(params.postId, user.id);
 
   return (
     <main className="flex w-full min-w-0 gap-5">
