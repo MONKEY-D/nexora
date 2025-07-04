@@ -7,53 +7,32 @@ import UserTooltip from "@/components/UserToolTip";
 import prisma from "@/lib/prisma";
 import { getPostDataInclude, UserData } from "@/lib/types";
 import { Loader2 } from "lucide-react";
-import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-type Params = { params: { postId: string } };
+type PgProps = { params: { postId: string } };
 
-async function getPost(postId: string, loggedInUserId: string) {
+async function getPost(postId: string, userId: string) {
   const post = await prisma.post.findUnique({
     where: { id: postId },
-    include: getPostDataInclude(loggedInUserId),
+    include: getPostDataInclude(userId),
   });
-
   if (!post) notFound();
-
   return post;
 }
 
-export async function generateMetadata({ params }: Params): Promise<Metadata> {
+export default async function Page({ params }: PgProps) {
   const { user } = await validateRequest();
-  if (!user) return {};
+  if (!user) return <p className="text-destructive">Not authorized</p>;
 
   const post = await getPost(params.postId, user.id);
-
-  return {
-    title: `${post.user.displayName}: ${post.content.slice(0, 50)}...`,
-  };
-}
-
-export default async function Page({ params }: Params) {
-  const { user } = await validateRequest();
-  if (!user) {
-    return (
-      <p className="text-destructive">
-        You&apos;re not authorized to view this page.
-      </p>
-    );
-  }
-
-  const post = await getPost(params.postId, user.id);
-
   return (
-    <main className="flex w-full min-w-0 gap-5">
-      <div className="w-full min-w-0 space-y-5">
+    <main className="flex w-full gap-5">
+      <div className="w-full space-y-5">
         <Post post={post} />
       </div>
-      <div className="sticky top-[5.25rem] hidden h-fit w-80 flex-none lg:block">
+      <div className="sticky top-[5.25rem] hidden w-80 lg:block">
         <Suspense fallback={<Loader2 className="mx-auto animate-spin" />}>
           <UserInfoSidebar user={post.user} />
         </Suspense>
@@ -63,12 +42,12 @@ export default async function Page({ params }: Params) {
 }
 
 async function UserInfoSidebar({ user }: { user: UserData }) {
-  const { user: loggedInUser } = await validateRequest();
-  if (!loggedInUser) return null;
+  const { user: me } = await validateRequest();
+  if (!me) return null;
 
   return (
-    <div className="space-y-5 rounded-2xl bg-card p-5 shadow-sm">
-      <div className="text-xl font-bold">About this user</div>
+    <div className="space-y-5 bg-card p-5 rounded-2xl shadow-sm">
+      <h2 className="text-xl font-bold">About this user</h2>
       <UserTooltip user={user}>
         <Link
           href={`/users/${user.username}`}
@@ -76,27 +55,25 @@ async function UserInfoSidebar({ user }: { user: UserData }) {
         >
           <UserAvatar avatarUrl={user.avatarUrl} className="flex-none" />
           <div>
-            <p className="line-clamp-1 break-all font-semibold hover:underline">
+            <p className="font-semibold hover:underline line-clamp-1">
               {user.displayName}
             </p>
-            <p className="line-clamp-1 break-all text-muted-foreground">
-              @{user.username}
-            </p>
+            <p className="text-muted-foreground">@{user.username}</p>
           </div>
         </Link>
       </UserTooltip>
       <Linkify>
-        <div className="line-clamp-6 whitespace-pre-line break-words text-muted-foreground">
+        <div className="text-muted-foreground whitespace-pre-line break-words line-clamp-6">
           {user.bio}
         </div>
       </Linkify>
-      {user.id !== loggedInUser.id && (
+      {user.id !== me.id && (
         <FollowButton
           userId={user.id}
           initialState={{
             followers: user._count.followers,
             isFollowedByUser: user.followers.some(
-              ({ followerId }) => followerId === loggedInUser.id,
+              (f) => f.followerId === me.id,
             ),
           }}
         />
