@@ -12,11 +12,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-// ✅ Shared type for both page and metadata
+// ✅ Updated type for Next.js 15 - params is now a Promise
 interface PostParamProps {
-  params: {
+  params: Promise<{
     postId: string;
-  };
+  }>;
 }
 
 // ✅ Required to satisfy dynamic segment expectations
@@ -27,11 +27,14 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PostParamProps): Promise<Metadata> {
+  // ✅ Await params in Next.js 15
+  const { postId } = await params;
+
   const { user } = await validateRequest();
   if (!user) return {};
 
   const post = await prisma.post.findUnique({
-    where: { id: params.postId },
+    where: { id: postId },
     include: getPostDataInclude(user.id),
   });
 
@@ -43,6 +46,9 @@ export async function generateMetadata({
 }
 
 export default async function Page({ params }: PostParamProps) {
+  // ✅ Await params in Next.js 15
+  const { postId } = await params;
+
   const { user } = await validateRequest();
   if (!user) {
     return (
@@ -53,7 +59,7 @@ export default async function Page({ params }: PostParamProps) {
   }
 
   const post = await prisma.post.findUnique({
-    where: { id: params.postId },
+    where: { id: postId },
     include: getPostDataInclude(user.id),
   });
 
